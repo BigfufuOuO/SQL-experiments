@@ -28,7 +28,7 @@ WHERE Borrow.reader_ID = Reader.ID and Reader.name = '李林'
 SELECT name
 FROM Reader
 JOIN Borrow ON Borrow.reader_ID = Reader.ID
-GROUP BY Reader.name
+GROUP BY Reader.ID
 HAVING COUNT(Borrow.Book_ID) > 3;
 
 # 查询没有借阅读者“李林”所借的任何一本书的读者姓名和读者号;
