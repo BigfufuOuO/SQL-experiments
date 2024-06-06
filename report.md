@@ -1,6 +1,9 @@
 https://docs.djangoproject.com/zh-hans/5.0/intro/tutorial01/
 https://www.bilibili.com/video/BV1cm4y127ce?p=38&spm_id_from=pageDriver&vd_source=4825f093b332088b99207eb66ec67b90
 
+<!--https://github.com/liuly0322/teacher-management-system/tree/main?tab=readme-ov-file-->
+https://v4.bootcss.com/docs/getting-started/introduction/
+
 ## 连接MYSQL
 - 安装mysqlclient
   ```shell

@@ -11,10 +11,10 @@ class Teacher(models.Model):
         (9, '副研究员'), (10, '特任研究员'),
         (11, '研究员')
     ]
-    ID = models.CharField(max_length=5, primary_key=True)
-    name = models.CharField(max_length=256)
-    sex = models.IntegerField(choices=sex_choices)
-    position = models.IntegerField(choices=position_choices)
+    ID = models.CharField(verbose_name='工号', max_length=5, primary_key=True)
+    name = models.CharField(verbose_name='姓名', max_length=256)
+    sex = models.IntegerField(verbose_name='性别', choices=sex_choices)
+    position = models.IntegerField(verbose_name='职称', choices=position_choices)
     
     def __str__(self):
         return self.ID

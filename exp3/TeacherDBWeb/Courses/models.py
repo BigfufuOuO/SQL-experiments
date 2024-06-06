@@ -21,8 +21,8 @@ class Teacher_Course(models.Model):
         (3, '秋季学期')
     ]
     
-    teacher_ID = models.CharField(max_length=5)
-    course_ID = models.CharField(max_length=256)
+    teacher_ID = models.ForeignKey(to='Teachers.Teacher', to_field='ID', on_delete=models.CASCADE)
+    course_ID = models.ForeignKey(to='Course', to_field='ID', on_delete=models.CASCADE)
     semester = models.IntegerField()
     year = models.IntegerField()
     hours_taken = models.IntegerField()

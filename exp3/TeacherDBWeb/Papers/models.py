@@ -29,8 +29,8 @@ class Paper(models.Model):
     
 # TEACHER_PAPER
 class Teacher_Paper(models.Model):
-    teacher = models.ForeignKey('Teachers.Teacher', on_delete=models.CASCADE)
-    paper = models.ForeignKey('Papers.Paper', on_delete=models.CASCADE)
+    teacher = models.ForeignKey(to='Teachers.Teacher', to_field='ID', on_delete=models.CASCADE)
+    paper = models.ForeignKey(to='Paper', to_field='ID', on_delete=models.CASCADE)
     rank = models.IntegerField()
     is_corresponding_author = models.BooleanField()
     

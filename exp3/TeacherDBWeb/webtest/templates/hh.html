@@ -8,7 +8,28 @@
     <div> {{ name }} </div>
 </body>
 
-<body>
-    
-</body>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>名字</th>
+        <th>性别</th>
+        <th>职称</th>
+    </tr>
+    {% for teacher in teacher_list %} <!-- teacher_list 是传入的参数 -->
+    <tr>
+        <td>{{ teacher.ID }}</td>
+        <td>{{ teacher.name }}</td>
+        <td>{{ teacher.sex }}</td>
+        <td>{{ teacher.position }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<form method="post">
+    {% csrf_token %}
+    <input type="text" name="ID" placeholder="工号">
+    <input type="text" name="name" placeholder="名字">
+    <input type="text" name="sex" placeholder="性别">
+    <input type="text" name="position" placeholder="职称">
+</form>
 </html>

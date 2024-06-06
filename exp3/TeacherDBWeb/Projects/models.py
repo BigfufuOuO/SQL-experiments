@@ -22,8 +22,8 @@ class Project(models.Model):
         return self.ID
     
 class Teacher_Project(models.Model):
-    teacher_ID = models.CharField(max_length=5)
-    project_ID = models.CharField(max_length=256)
+    teacher_ID = models.ForeignKey(to='Teachers.Teacher', to_field='ID', on_delete=models.CASCADE) # ForeignKey 级联删除
+    project_ID = models.ForeignKey(to='Project', to_field='ID', on_delete=models.CASCADE) # ForeignKey 级联删除
     rank = models.IntegerField()
     fund_taken = models.FloatField()
     
