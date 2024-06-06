@@ -3,6 +3,7 @@ https://www.bilibili.com/video/BV1cm4y127ce?p=38&spm_id_from=pageDriver&vd_sourc
 
 <!--https://github.com/liuly0322/teacher-management-system/tree/main?tab=readme-ov-file-->
 https://v4.bootcss.com/docs/getting-started/introduction/
+https://www.cnblogs.com/tuyin/p/17142353.html#_label15
 
 ## 连接MYSQL
 - 安装mysqlclient
