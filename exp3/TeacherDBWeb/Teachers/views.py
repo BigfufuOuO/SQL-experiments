@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from . import models
 from .models import TeacherForm
 
@@ -11,12 +11,12 @@ def teachermanage(request):
                   {'teacherForm': teacherForm, 'length': length})
 
 def teacher_search(request):
-    if request.method == "GET":
-        form = TeacherForm(request.GET)
-        print(form)
+    #if request.method == "GET":
+    form = TeacherForm(data=request.GET, operation_type='query')
     teachers = models.Teacher.objects.all()
     return render(request, 'teacher_search.html',
-                  {'teachers': teachers})
+                  {'teacherForm': form,
+                   'teachers': teachers})
 
 def teacher_add(request, id='0'):
     # POST get input and check
@@ -40,8 +40,9 @@ def teacher_edit(request, id='0'):
         return render(request, 'teacher_edit.html',
                       {'teacherForm': form, 'length': length})
 
+    original_data = models.Teacher.objects.get(ID=id)
     if request.method == "POST":
-        form = TeacherForm(request.POST)
+        form = TeacherForm(data=request.POST, instance=original_data) # 防止编辑新建
         if form.is_valid():
             form.save()
             teachers = models.Teacher.objects.all()
@@ -50,4 +51,9 @@ def teacher_edit(request, id='0'):
         else:
             return render(request, 'teacher_edit.html',
                       {'teacherForm': form, 'length': length})
+
+def teacher_delete(request, id='0'):
+    models.Teacher.objects.get(ID=id).delete()
+    return redirect('/teachers/search/')
+    pass
 

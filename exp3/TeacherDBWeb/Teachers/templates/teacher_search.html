@@ -19,7 +19,7 @@
             <td>{{ teacher.get_position_display }}</td>
             <td>
                 <a class="btn btn-info btn-sm" href="/teachers/edit/{{ teacher.ID }}" role="button">编辑</a>
-                <a class="btn btn-danger btn-sm" href="#" role="button">编辑</a>
+                <a class="btn btn-danger btn-sm" href="/teachers/delete/{{ teacher.ID }}" role="button">删除</a>
             </td>
         </tr>
     {% endfor %}
