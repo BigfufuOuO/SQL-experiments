@@ -1,0 +1,33 @@
+{% extends 'basiclayout.html' %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="mt-3">成功添加教师！</h1>
+        <div class="card-header">
+            已添加的教师信息
+        </div>
+        <div class="card-body">
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                  <th scope="col">工号</th>
+                  <th scope="col">姓名</th>
+                  <th scope="col">性别</th>
+                  <th scope="col">职称</th>
+                </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>{{ teacherForm.ID }}</td>
+                <td>{{ teacherForm.name }}</td>
+                <td>{{ teacherForm.get_sex_display }}</td>
+                <td>{{ teacherForm.get_position_display }}</td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+
+    <button type="button" class="btn btn-success" onclick="window.location.href='/teachers/'">返回</button>
+
+    </div>
+{% endblock %}

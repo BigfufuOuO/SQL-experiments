@@ -1,4 +1,5 @@
 from django.db import models
+from django import forms
 
 # Create your models here.
 class Teacher(models.Model):
@@ -18,3 +19,15 @@ class Teacher(models.Model):
     
     def __str__(self):
         return self.ID
+    
+    
+class TeacherForm(forms.ModelForm):
+    class Meta:
+        model = Teacher
+        fields = "__all__"
+        widgets = {
+            "ID": forms.TextInput(attrs={'class': 'form-control'}),
+            "name": forms.TextInput(attrs={'class': 'form-control'}),
+            "sex": forms.Select(attrs={'class': 'custom-select'}),
+            "position": forms.Select(attrs={'class': 'custom-select'}),
+        }
