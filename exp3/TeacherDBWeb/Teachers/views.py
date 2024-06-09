@@ -3,6 +3,7 @@ from . import models
 from .models import TeacherForm
 from .tools.Page import Pageination
 
+
 length = [3, 3, 3, 3]
 
 # Create your views here.
@@ -25,7 +26,7 @@ def teacher_search(request):
 
     # page
     page = Pageination(request, itemCount)
-    teachers = teachers[(page.pageInfo['pageNow'] - 1) * 10: page.pageInfo['pageNow'] * 10]
+    teachers = teachers[(page.pageInfo['pageNowInt'] - 1) * 10: page.pageInfo['pageNowInt'] * 10]
 
     # delete unique error
     if form.has_error('ID', code='unique'):
