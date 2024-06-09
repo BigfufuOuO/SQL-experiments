@@ -12,6 +12,7 @@
             <div class="form-group col-md-{{ length.forloop.counter0 }}">
               <label>{{ field.label }}</label>
               {{ field }}
+                {{ if  }}
               <span style="color: #c82333;">{{ field.errors.0 }}</span>
             </div>
             {% endfor %}
@@ -40,10 +41,10 @@ document.addEventListener('DOMContentLoaded', function (){
 
     addButton.addEventListener('click', function (){
         //event.preventDefault();
-        const formData = new FormData(form);
-        const id = formData.get('ID');
+        //const formData = new FormData(form);
+        //const id = formData.get('ID');
 
-        form.action = '/teachers/add/' + id;
+        form.action = '/teachers/add/';
         form.method = 'post';
     });
 });

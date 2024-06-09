@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from . import models
 from .models import TeacherForm
+from .tools.Page import Pageination
 
 length = [3, 3, 3, 3]
 
@@ -11,12 +12,30 @@ def teachermanage(request):
                   {'teacherForm': teacherForm, 'length': length})
 
 def teacher_search(request):
-    #if request.method == "GET":
     form = TeacherForm(data=request.GET, operation_type='query')
-    teachers = models.Teacher.objects.all()
+    data_dict = {}
+    for field in form.fields:
+        data = request.GET.get(field, '')
+        if data:
+            data_dict[field] = data
+
+    teachers = models.Teacher.objects.filter(**data_dict)
+    itemCount = teachers.count()
+    print(teachers, itemCount)
+
+    # page
+    page = Pageination(request, itemCount)
+    teachers = teachers[(page.pageInfo['pageNow'] - 1) * 10: page.pageInfo['pageNow'] * 10]
+
+    # delete unique error
+    if form.has_error('ID', code='unique'):
+        del form.errors['ID']
+
+
     return render(request, 'teacher_search.html',
                   {'teacherForm': form,
-                   'teachers': teachers})
+                   'teachers': teachers,
+                   'page_list': page.page_list, 'pageInfo': page.pageInfo})
 
 def teacher_add(request, id='0'):
     # POST get input and check
@@ -36,18 +55,17 @@ def teacher_edit(request, id='0'):
     if request.method == "GET":
         # get original data according to id
         original_data = models.Teacher.objects.get(ID=id)
-        form = TeacherForm(instance=original_data)
+        form = TeacherForm(instance=original_data, operation_type='update')
         return render(request, 'teacher_edit.html',
                       {'teacherForm': form, 'length': length})
 
     original_data = models.Teacher.objects.get(ID=id)
     if request.method == "POST":
-        form = TeacherForm(data=request.POST, instance=original_data) # 防止编辑新建
+        form = TeacherForm(data=request.POST, instance=original_data, operation_type='update') # 防止编辑新建
         if form.is_valid():
             form.save()
             teachers = models.Teacher.objects.all()
-            return render(request, 'teacher_search.html',
-                          {'teachers': teachers})
+            return redirect('/teachers/search/')
         else:
             return render(request, 'teacher_edit.html',
                       {'teacherForm': form, 'length': length})

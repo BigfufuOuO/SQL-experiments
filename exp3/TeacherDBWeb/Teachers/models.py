@@ -23,7 +23,7 @@ class Teacher(models.Model):
     
     
 class TeacherForm(forms.ModelForm):
-    ID = forms.CharField(label="工号",
+    ID = forms.CharField(label="工号", max_length=5,
                          validators=[RegexValidator(r'^\d{5}$', '必须是5位数字')],
                          widget=forms.TextInput(attrs={'class': 'form-control'}))
     def clean_name(self):
@@ -37,18 +37,18 @@ class TeacherForm(forms.ModelForm):
         return str_name
 
     # def clean_ID(self):
-    #     new_ID = self.cleaned_data['ID']
-    #     exist_ID = Teacher.objects.exclude(ID=self.instance).filter(ID=new_ID).exists()
-    #     print(exist_ID)
-    #     if exist_ID:
+    #     newID = self.cleaned_data['ID']
+    #     is_existID = Teacher.objects.exclude(ID=newID).filter(ID=newID).exists()
+    #     if is_existID:
     #         raise ValidationError('工号已存在')
-    #     return new_ID
+    #     return newID
+
     def __init__(self, *args, **kwargs):
         operation_type = kwargs.pop('operation_type', None)
         super(TeacherForm, self).__init__(*args, **kwargs)
-        if self.instance and self.instance.pk:
+        if operation_type == 'update':
             self.fields['ID'].disabled = True
-        if operation_type == 'query':
+        elif operation_type == 'query':
             for field in self.fields.values():
                 field.required = False
         
