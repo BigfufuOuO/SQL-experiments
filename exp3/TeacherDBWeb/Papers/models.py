@@ -1,4 +1,6 @@
 from django.db import models
+from django import forms
+from Teachers.models import Teacher
 
 # Create your models here.
 class Paper(models.Model):
@@ -24,18 +26,100 @@ class Paper(models.Model):
     publish_type = models.IntegerField(choices=type_choices, verbose_name="类型")
     publish_level = models.IntegerField(choices=level_choices, verbose_name="级别")
     
-    def __str__(self):
-        return self.ID
+    # def __str__(self):
+    #     return self.ID
     
 # TEACHER_PAPER
 class Teacher_Paper(models.Model):
+    corresponding_author_choices = [
+        (1, '是'), (0, '否')
+    ]
     teacher = models.ForeignKey(to='Teachers.Teacher', to_field='ID', on_delete=models.CASCADE)
     paper = models.ForeignKey(to='Paper', to_field='ID', on_delete=models.CASCADE)
-    rank = models.IntegerField()
-    is_corresponding_author = models.BooleanField()
+    rank = models.IntegerField(verbose_name='排名')
+    is_corresponding_author = models.BooleanField(choices=corresponding_author_choices, default=0,
+                                                  verbose_name='是否通讯作者')
     
     class Meta:
         unique_together = ('teacher', 'paper')
         
     def __str__(self):
         return self.teacher.ID + ' ' + self.paper.ID
+
+
+# Paper ModelForm
+class PaperForm(forms.ModelForm):
+    def clean_ID(self):
+        str_ID = str(self.cleaned_data['ID'])
+        if len(str_ID) != 5:
+            raise forms.ValidationError('ID长度必须为5')
+        return str_ID
+    class Meta:
+        model = Paper
+        fields = ['ID', 'title', 'source', 'publish_date', 'publish_type', 'publish_level']
+        widgets = {
+            'ID': forms.TextInput(attrs={'class': 'form-control'}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'source': forms.TextInput(attrs={'class': 'form-control'}),
+            'publish_date': forms.DateInput(attrs={'class': 'form-control'}),
+            'publish_type': forms.Select(attrs={'class': 'custom-select'}),
+            'publish_level': forms.Select(attrs={'class': 'custom-select'})
+        }
+
+
+class AuthorForm(forms.ModelForm):
+    authors = forms.ModelChoiceField(queryset=Teacher.objects.all(), label='作者', required=True,
+                                     widget=forms.Select(attrs={'class': 'author-select form-control',}))
+    rank = forms.IntegerField(min_value=1,
+                              widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    class Meta:
+        model = Teacher_Paper
+        fields = ['authors', 'rank', 'is_corresponding_author']
+        widgets = {
+            # 'authors': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            # 'rank': forms.NumberInput(attrs={'class': 'form-control'}),
+            'is_corresponding_author': forms.Select(attrs={'class': 'custom-select'})
+        }
+
+
+
+class AuthorFormSet_custom(forms.BaseModelFormSet):
+    def clean(self):
+        super().clean()
+        # 作者不能为空
+        for form in self.forms:
+            if not form.cleaned_data.get('authors', None):
+                raise forms.ValidationError('作者不能为空')
+
+        if any(self.errors):
+            return
+
+        # 作者不能重复
+        authors = []
+        for form in self.forms:
+            author = form.cleaned_data.get('authors', None)
+            if author in authors:
+                raise forms.ValidationError('作者重复')
+            authors.append(author)
+
+        # 排名不能重复
+        ranks = []
+        for form in self.forms:
+            rank = form.cleaned_data.get('rank', None)
+            if rank in ranks:
+                raise forms.ValidationError('排名重复')
+            ranks.append(rank)
+
+        # 通讯作者只能有一个
+        corresponding_author = []
+        num_corresponding_author = 0
+        for form in self.forms:
+            is_corresponding_author = form.cleaned_data.get('is_corresponding_author', None)
+            if is_corresponding_author:
+                num_corresponding_author += 1
+            corresponding_author.append(is_corresponding_author)
+        if num_corresponding_author > 1:
+            raise forms.ValidationError('通讯作者只能有一个')
+
+AuthorFormSet = forms.modelformset_factory(Teacher_Paper, form=AuthorForm,
+                                           formset=AuthorFormSet_custom, extra=1)

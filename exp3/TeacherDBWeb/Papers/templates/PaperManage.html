@@ -1,5 +1,203 @@
-{% extends 'Teachers/basiclayout.html' %}
+{% extends 'basiclayout.html' %}
+{% load static %}
+
+{% block css %}
+	<link rel="stylesheet" href="{% static 'plugins/datepicker/bootstrap-datepicker-1.9.0/css/bootstrap-datepicker3.css' %}">
+    <link href="{% static 'plugins/select2-4.1.0-rc.0/dist/css/select2.css' %}" rel="stylesheet" />
+    <style>
+        .container::after{
+            content: '';
+            display: block;
+            height: 20px;
+        }
+    </style>
+{% endblock %}
 
 {% block content %}
-	<h1 class="mt-3">论文管理</h1>
+    <div class="container">
+        <h1 class="mt-3">论文发表</h1>
+        <div class="card">
+            <div class="card-body" id="paperForm">
+                <form novalidate>
+                    <div id="paperForm-container">
+                        <div class="form-row">
+                            {% for field in paperForm %}
+                            <div class="form-group col-md-{{ length.forloop.counter0 }}">
+                                <label>{{ field.label }}</label>
+                                {{ field }}
+                                <span style="color: #c82333;" class="error-msg">{{ field.errors.0 }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            论文作者
+                        </div>
+                        <div class="card-body" id="authorForm-container">
+                            {{ authorFormSet.management_form }}
+                            {% for authorForm in authorFormSet %}
+                                <div class="form-row">
+                                {% for field in authorForm %}
+                                    {% if field.label != 'Id' %}
+                                    <div class="form-group col-md-3">
+                                        <label>{{ field.label }}</label>
+                                        {{ field }}
+                                        <span style="color: #c82333;" class="error-msg"></span>
+                                    </div>
+
+                                    {% endif %}
+                                {% endfor %}
+                                <button type="button" class="btn-warning" id="deleteAuthorButton">删除作者</button>
+                                </div>
+                            {% endfor %}
+
+                        </div>
+                        <div class="container">
+                                <button type="button" class="btn btn-info" id="addAuthorButton">新增作者</button>
+                        </div>
+                    </div>
+                    <input type="hidden" name="author_num" id="author_num" value="1">
+                    <button type="search" class="btn btn-info" id="searchButton">查询</button>
+                    <button type="add" class="btn btn-success" id="addButton">新增</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% block list %}
+    {% endblock %}
+
+
+{% endblock %}
+{% block js %}
+	<script type="text/javascript">
+//使用ajax
+    {#$(document).ready(function(){#}
+    {#//页面加载完后执行#}
+    {#    buttonEvent();#}
+    {# });#}
+    {##}
+    {#function buttonEvent(){#}
+    {##}
+    {##}
+    {#    $('#searchButton').click(function(){#}
+    {#        console.log('searchButton clicked');#}
+    {#    });#}
+    {##}
+    {#    $('#addButton').click(function(){#}
+    {#        $(".error-msg").empty();#}
+    {#        event.preventDefault();#}
+    {#        $.ajax({#}
+    {#            url: '/papers/add/',#}
+    {#            type: 'post',#}
+    {#            data: $('#paperForm form').serialize(),#}
+    {#            dataType: "JSON",#}
+    {#            success: function(res){#}
+    {#                console.log(res);#}
+    {#                if(res.status){#}
+    {#                    console.log('add success');#}
+    {#                }#}
+    {#                else{#}
+    {#                    $.each(res.error, function(key, value){#}
+    {#                        $('#id_' + key).next().text(value[0]);#}
+    {#                    });#}
+    {#                }#}
+    {#                //window.location.href = '/papers/add/';#}
+    {#            }#}
+    {#        });#}
+    {#        console.log('addButton clicked');#}
+    {#    });#}
+    {# }#}
+</script>
+    <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function (){
+            const Form = document.querySelector('#paperForm');
+            const searchButton = document.getElementById('searchButton');
+            const addButton = document.getElementById('addButton');
+
+            searchButton.addEventListener('click', function (){
+                Form.action = '/papers/search/';
+                Form.method = 'get';
+            });
+
+            addButton.addEventListener('click', function (){
+                event.preventDefault();
+                $.ajax(
+                    {
+                        url: '/papers/add/',
+                        type: 'post',
+                        data: $('#paperForm form').serialize(),
+                        dataType: "JSON",
+                        success: function(res) {
+                            console.log(res);
+                            if (res.status) {
+                                console.log('add success');
+                            } else {
+                                console.log('add failed');
+                            }
+                        }
+                    });
+            })});
+    </script>
+
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'plugins/datepicker/bootstrap-datepicker-1.9.0/js/bootstrap-datepicker.min.js' %}"></script>
+    <script src="{% static 'plugins/datepicker/bootstrap-datepicker-1.9.0/locales/bootstrap-datepicker.zh-CN.min.js' %}"></script>
+    <script src="{% static 'plugins/select2-4.1.0-rc.0/dist/js/select2.min.js' %}"></script>
+<script>
+    $('#id_publish_date').datepicker({
+        format: 'yyyy-mm-dd',
+        startDate: '2001-01-01',
+        endDate: '0',
+        language: 'zh-CN',
+        autoclose: true,
+        todayHighlight: true
+    });
+</script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+            function initializeSelect2(element){
+                {#$('.author-select').each(function () {#}
+                {#    if ($(this).hasClass('select2-hidden-accessible')) {#}
+                {#        $(this).select2('destroy');#}
+                {#    }#}
+                {# });#}
+                $(element).select2({
+                    placeholder: '请选择作者',
+                    allowClear: true,
+                });
+            }
+
+            initializeSelect2('.author-select');
+
+            $('#addAuthorButton').click(function(){
+                var newIndex = $('#paperForm .form-row').length - 1;
+                console.log(newIndex);
+                //销毁 select2
+                $('#authorForm-container .author-select').select2('destroy');
+                var newFormHtml = $('#authorForm-container .form-row:first').clone();
+                newFormHtml.find(':input:not(button), select, span').each(function(){
+                    var name = $(this).attr('name');
+                    var id = $(this).attr('id');
+                    if (name){
+                        $(this).attr('name', name.replace('-0-', '-' + newIndex + '-'));
+                        //console.log($(this).attr('name'));
+                    }
+                    if (id){
+                        $(this).attr('id', id.replace('-0-', '-' + newIndex + '-'));
+                        //console.log($(this).attr('id'))
+                    }
+                    //console.log($(this));
+                });
+
+                $('#authorForm-container').append(newFormHtml);
+                $('#author_num').val(newIndex + 1);
+                $('#id_form-TOTAL_FORMS').val(newIndex + 1);
+                // select 2 初始化复制的元素
+                initializeSelect2('.author-select');
+                //console.log($('#id_form-TOTAL_FORMS').val());
+            });
+        });
+    </script>
 {% endblock %}

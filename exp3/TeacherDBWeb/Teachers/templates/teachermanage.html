@@ -12,7 +12,6 @@
             <div class="form-group col-md-{{ length.forloop.counter0 }}">
               <label>{{ field.label }}</label>
               {{ field }}
-                {{ if  }}
               <span style="color: #c82333;">{{ field.errors.0 }}</span>
             </div>
             {% endfor %}

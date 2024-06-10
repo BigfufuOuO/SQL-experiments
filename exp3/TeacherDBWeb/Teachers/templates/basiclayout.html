@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <title>教学科研登记系统</title>
     <link rel="stylesheet" href="{% static 'plugins/bootstrap-4/css/bootstrap.min.css' %}">
+    {% block css %}
+    {% endblock %}
 </head>
 
 <body>
@@ -30,13 +32,15 @@
         </li>
       </ul>
     </div>
-   </nav>
-  </div>
+  </div></nav>
    
   {% block content %}
   {% endblock %}
 
-<script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+
 <script src="{% static 'plugins/bootstrap-4/js/bootstrap.min.js' %}"></script>
+
+{% block js %}
+{% endblock %}
 </body>
 </html>
