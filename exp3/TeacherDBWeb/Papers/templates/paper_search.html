@@ -1,0 +1,62 @@
+{% extends 'PaperManage.html' %}
+
+{% block list %}
+    <table class="table mt-5">
+    <thead class="thead-dark">
+      <tr>
+        {% for field in paperForm %}
+        <th scope="col">{{ field.label }}</th>
+        {% endfor %}
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    {% for paper in papers %}
+        <tr>
+            <td>{{ paper.ID }}</td>
+            <td>{{ paper.title }}</td>
+            <td>{{ paper.source }}</td>
+            <td>{{ paper.publish_date }}</td>
+            <td>{{ paper.publish_type }}</td>
+            <td>{{ paper.publish_level }}</td>
+            <td>
+                <a class="btn btn-info btn-sm" href="/papers/edit/{{ paper.ID }}" role="button">编辑</a>
+                <a class="btn btn-danger btn-sm" href="/papers/delete/{{ paper.ID }}" role="button">删除</a>
+            </td>
+        </tr>
+    {% endfor %}
+  </table>
+
+    <!-- 如果没有搜索到，弹出警告 -->
+    {% if papers|length == 0 %}
+    <div class="alert alert-danger" role="alert">
+  没有搜索到 <a href="#" class="alert-link">符合条件的项</a>. 请检查你的输入.
+    </div>
+    {% endif %}
+
+    <!-- 分页 -->
+    <nav aria-label="Page navigation">
+  <ul class="pagination justify-content-center">
+    <li class="page-item">
+        {{ pageInfo.pagePrev }}
+    </li>
+        {{ page_list }}
+    <li class="page-item">
+        {{ pageInfo.pageNext }}
+    </li>
+  </ul>
+</nav>
+{% endblock %}
+
+{% block search_js %}
+	<script>
+    //不允许作者
+    var ele = document.getElementById('authorCard');
+    ele.innerHTML = '';
+    ele.remove();
+
+    var addButton = document.getElementById('addButton');
+    //禁用
+    addButton.disabled = true;
+    </script>
+
+{% endblock %}

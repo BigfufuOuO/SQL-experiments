@@ -30,7 +30,7 @@
                             {% endfor %}
                         </div>
                     </div>
-                    <div class="card">
+                    <div class="card" id="authorCard">
                         <div class="card-header">
                             论文作者
                         </div>
@@ -63,16 +63,17 @@
                 </form>
             </div>
         </div>
-    </div>
-
     {% block list %}
     {% endblock %}
+    </div>
+
+
 
 
 {% endblock %}
 {% block js %}
-	<script type="text/javascript">
-//使用ajax
+	<!--<script type="text/javascript">-->
+<!--//使用ajax-->
     {#$(document).ready(function(){#}
     {#//页面加载完后执行#}
     {#    buttonEvent();#}
@@ -109,14 +110,15 @@
     {#        console.log('addButton clicked');#}
     {#    });#}
     {# }#}
-</script>
-    <script type="text/javascript">
+<!--</script>-->
+    <script>
     document.addEventListener('DOMContentLoaded', function (){
-            const Form = document.querySelector('#paperForm');
+            const Form = document.querySelector('#paperForm form');
             const searchButton = document.getElementById('searchButton');
             const addButton = document.getElementById('addButton');
 
             searchButton.addEventListener('click', function (){
+                //event.preventDefault();
                 Form.action = '/papers/search/';
                 Form.method = 'get';
             });
@@ -131,10 +133,11 @@
                         dataType: "JSON",
                         success: function(res) {
                             console.log(res);
-                            if (res.status) {
-                                console.log('add success');
-                            } else {
-                                console.log('add failed');
+                            if (!res.status){
+                                console.log(res.data);
+                            }
+                            else {
+                                alert('添加成功！');
                             }
                         }
                     });
@@ -200,4 +203,6 @@
             });
         });
     </script>
+    {% block search_js %}
+    {% endblock %}
 {% endblock %}

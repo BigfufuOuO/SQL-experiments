@@ -43,8 +43,8 @@ class Teacher_Paper(models.Model):
     class Meta:
         unique_together = ('teacher', 'paper')
         
-    def __str__(self):
-        return self.teacher.ID + ' ' + self.paper.ID
+    # def __str__(self):
+    #     return self.teacher.ID + ' ' + self.paper.ID
 
 
 # Paper ModelForm
@@ -66,15 +66,26 @@ class PaperForm(forms.ModelForm):
             'publish_level': forms.Select(attrs={'class': 'custom-select'})
         }
 
+    def __init__(self, *args, **kwargs):
+        operation_type = kwargs.pop('operation_type', None)
+        self.operation_type = operation_type
+        super(PaperForm, self).__init__(*args, **kwargs)
+        if operation_type == 'update':
+            self.fields['ID'].disabled = True
+        elif operation_type == 'query':
+            for field in self.fields.values():
+                field.required = False
+
+
 
 class AuthorForm(forms.ModelForm):
-    authors = forms.ModelChoiceField(queryset=Teacher.objects.all(), label='作者', required=True,
+    teachers = forms.ModelChoiceField(queryset=Teacher.objects.all(), label='作者', required=True,
                                      widget=forms.Select(attrs={'class': 'author-select form-control',}))
     rank = forms.IntegerField(min_value=1,
                               widget=forms.NumberInput(attrs={'class': 'form-control'}))
     class Meta:
         model = Teacher_Paper
-        fields = ['authors', 'rank', 'is_corresponding_author']
+        fields = ['teachers', 'rank', 'is_corresponding_author']
         widgets = {
             # 'authors': forms.SelectMultiple(attrs={'class': 'form-control'}),
             # 'rank': forms.NumberInput(attrs={'class': 'form-control'}),
@@ -84,11 +95,17 @@ class AuthorForm(forms.ModelForm):
 
 
 class AuthorFormSet_custom(forms.BaseModelFormSet):
+
+
     def clean(self):
         super().clean()
+        # 输出所有数据
+        for form in self.forms:
+            print(form.cleaned_data)
+
         # 作者不能为空
         for form in self.forms:
-            if not form.cleaned_data.get('authors', None):
+            if not form.cleaned_data.get('teachers', None):
                 raise forms.ValidationError('作者不能为空')
 
         if any(self.errors):
@@ -97,7 +114,7 @@ class AuthorFormSet_custom(forms.BaseModelFormSet):
         # 作者不能重复
         authors = []
         for form in self.forms:
-            author = form.cleaned_data.get('authors', None)
+            author = form.cleaned_data.get('teachers', None)
             if author in authors:
                 raise forms.ValidationError('作者重复')
             authors.append(author)
@@ -121,5 +138,18 @@ class AuthorFormSet_custom(forms.BaseModelFormSet):
         if num_corresponding_author > 1:
             raise forms.ValidationError('通讯作者只能有一个')
 
-AuthorFormSet = forms.modelformset_factory(Teacher_Paper, form=AuthorForm,
+    def save(self, commit=True):
+        for form in self.forms:
+            instance = form.save(commit=False)
+            paper_id = self.data.get('ID')
+            instance.teacher = form.cleaned_data.get('teachers')
+            instance.paper = Paper.objects.get(ID=paper_id)
+            print(instance.__dict__)
+            instance.save()
+
+
+
+
+
+AuthorFormSet = forms.modelformset_factory(model=Teacher_Paper, form=AuthorForm,
                                            formset=AuthorFormSet_custom, extra=1)
