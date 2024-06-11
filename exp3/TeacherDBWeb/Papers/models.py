@@ -79,9 +79,9 @@ class PaperForm(forms.ModelForm):
 
 
 class AuthorForm(forms.ModelForm):
-    teachers = forms.ModelChoiceField(queryset=Teacher.objects.all(), label='作者', required=True,
+    teachers = forms.ModelChoiceField(queryset=Teacher.objects.all(), label='作者',
                                      widget=forms.Select(attrs={'class': 'author-select form-control',}))
-    rank = forms.IntegerField(min_value=1,
+    rank = forms.IntegerField(min_value=1, label='排名',
                               widget=forms.NumberInput(attrs={'class': 'form-control'}))
     class Meta:
         model = Teacher_Paper
@@ -95,7 +95,11 @@ class AuthorForm(forms.ModelForm):
 
 
 class AuthorFormSet_custom(forms.BaseModelFormSet):
-
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for form in self.forms:
+            form.empty_permitted = False
+            form.fields['id'].required = False
 
     def clean(self):
         super().clean()
@@ -138,13 +142,12 @@ class AuthorFormSet_custom(forms.BaseModelFormSet):
         if num_corresponding_author > 1:
             raise forms.ValidationError('通讯作者只能有一个')
 
-    def save(self, commit=True):
+    def save(self, commit=True, paper_id='0'):
         for form in self.forms:
             instance = form.save(commit=False)
-            paper_id = self.data.get('ID')
+            paper_id = self.data.get('ID') or paper_id
             instance.teacher = form.cleaned_data.get('teachers')
             instance.paper = Paper.objects.get(ID=paper_id)
-            print(instance.__dict__)
             instance.save()
 
 
@@ -153,3 +156,5 @@ class AuthorFormSet_custom(forms.BaseModelFormSet):
 
 AuthorFormSet = forms.modelformset_factory(model=Teacher_Paper, form=AuthorForm,
                                            formset=AuthorFormSet_custom, extra=1)
+
+AuthorEditSet = forms.modelformset_factory(model=Teacher_Paper, form=AuthorForm, extra=0)

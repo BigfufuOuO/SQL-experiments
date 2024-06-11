@@ -16,8 +16,8 @@
             <td>{{ paper.title }}</td>
             <td>{{ paper.source }}</td>
             <td>{{ paper.publish_date }}</td>
-            <td>{{ paper.publish_type }}</td>
-            <td>{{ paper.publish_level }}</td>
+            <td>{{ paper.get_publish_type_display }}</td>
+            <td>{{ paper.get_publish_level_display }}</td>
             <td>
                 <a class="btn btn-info btn-sm" href="/papers/edit/{{ paper.ID }}" role="button">编辑</a>
                 <a class="btn btn-danger btn-sm" href="/papers/delete/{{ paper.ID }}" role="button">删除</a>
