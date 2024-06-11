@@ -95,14 +95,9 @@
                 success: function (res){
                     console.log(res);
                     if (res.status){
-                        if (res.changed){
-                            alert('没有修改数据');
-                        }
-                        else {
-                            var confirmed = confirm('修改成功');
-                            if (confirmed) {
-                                window.history.back();
-                            }
+                        var confirmed = confirm('修改成功');
+                        if (confirmed) {
+                            window.history.back();
                         }
                     } else {
                         console.log(res.data);
