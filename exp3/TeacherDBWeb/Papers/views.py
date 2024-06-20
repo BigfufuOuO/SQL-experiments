@@ -27,8 +27,10 @@ def paper_add(request):
         data_dic = {"status": True, "error": []}
         return HttpResponse(json.dumps(data_dic))
     else:
-        data_dic = {"status": False, "error": [paper_form.errors, author_form_set.errors,
-                                               author_form_set.non_form_errors()]}
+        data_dic = {"status": False,
+                    "error": {'paperForm error':paper_form.errors,
+                              'authorForms error':author_form_set.errors,
+                              'authorFormSet error':author_form_set.non_form_errors()}}
         return HttpResponse(json.dumps(data_dic))
 
 @csrf_exempt
@@ -92,6 +94,11 @@ def paper_edit(request, id='0'):
             data_dic = {"status": True}
             return HttpResponse(json.dumps(data_dic))
         else:
-            data_dic = {"status": False, "error": [paper_form.errors, author_form_set.errors,
-                                                   author_form_set.non_form_errors()]}
+            data_dic = {"status": False,
+                        "error": {'paperForm error':paper_form.errors,
+                                  'authorForms error':author_form_set.errors,
+                                  'authorFormSet error':author_form_set.non_form_errors()}}
             return HttpResponse(json.dumps(data_dic))
+
+def paper_delete(request, id='0'):
+    models.Paper.objects.get(ID=id).delete()

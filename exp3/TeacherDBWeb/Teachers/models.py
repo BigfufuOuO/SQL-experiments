@@ -19,7 +19,7 @@ class Teacher(models.Model):
     position = models.IntegerField(verbose_name='职称', choices=position_choices)
     
     def __str__(self):
-        return self.ID
+        return self.ID + ', ' + self.name + ', ' + str(self.get_sex_display()) + ', ' + str(self.get_position_display())
     
     
 class TeacherForm(forms.ModelForm):

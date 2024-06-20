@@ -1,7 +1,8 @@
 from django.db import models
 from django import forms
+import os, sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from Teachers.models import Teacher
-
 # Create your models here.
 class Paper(models.Model):
     type_choices = [

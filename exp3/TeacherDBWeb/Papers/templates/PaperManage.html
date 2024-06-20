@@ -10,6 +10,22 @@
             display: block;
             height: 20px;
         }
+
+        .error-msg{
+            position: absolute;
+            top: 100%;
+            left: 2%;
+        }
+
+        .form-group{
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .card{
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
     </style>
 {% endblock %}
 
@@ -48,7 +64,15 @@
 
                                     {% endif %}
                                 {% endfor %}
-                                <button type="button" class="btn-warning" id="deleteAuthorButton">删除作者</button>
+                                <div class="form-group col-md-1">
+                                  <label></label>
+                                <button type="button" class="btn btn-outline-danger delete-row-btn">
+                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+              <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
+            </svg>
+                                    删除
+                                </button>
+                                </div>
                                 </div>
                             {% endfor %}
 
@@ -124,6 +148,9 @@
             });
 
             addButton.addEventListener('click', function (){
+                document.querySelectorAll('.alert').forEach(function (item){
+                    item.remove();
+                });
                 event.preventDefault();
                 $.ajax(
                     {
@@ -133,15 +160,45 @@
                         dataType: "JSON",
                         success: function(res) {
                             console.log(res);
-                            if (!res.status){
+                            $('.error-message').text('');
+                            if (res.status) {
+                                var confirmed = confirm('修改成功');
+                                if (confirmed) {
+                                    window.history.back();
+                                }
+                            }else {
                                 console.log(res.data);
-                            }
-                            else {
-                                alert('添加成功！');
+                                let errorData = res.error;
+
+                                if (errorData['paperForm error']){
+                                    for (let key in errorData['paperForm error']){
+                                        $('#id_' + key).next().text(errorData['paperForm error'][key][0]);
+                                        //console.log(errorData['paperForm error'][key][0]);
+                                    }
+                                }
+
+                                if (errorData['authorForms error']) {
+                                    for (let i in errorData['authorForms error']) {
+                                        for (let key in errorData['authorForms error'][i]) {
+                                            if (key === 'teachers'){
+                                                $('#id_form-' + i + '-' + key).next().next().text(errorData['authorForms error'][i][key][0]);
+                                            } else {
+                                                $('#id_form-' + i + '-' + key).next().text(errorData['authorForms error'][i][key][0]);
+                                                //console.log(errorData['authorForms error'][i][key]);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (errorData['authorFormSet error'].length > 0){
+                                    // 在添加作者按钮前面添加alert
+                                    $('#addAuthorButton').before('<div class="alert alert-danger">' + errorData['authorFormSet error'] + '</div>');
+                                }
                             }
                         }
                     });
-            })});
+            });
+        });
     </script>
 
     <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
@@ -172,6 +229,7 @@
                 });
             }
 
+            checkDeleteButton();
             initializeSelect2('.author-select');
 
             $('#addAuthorButton').click(function(){
@@ -200,7 +258,55 @@
                 // select 2 初始化复制的元素
                 initializeSelect2('.author-select');
                 //console.log($('#id_form-TOTAL_FORMS').val());
+                checkDeleteButton();
             });
+
+            //删除作者
+            var container = document.getElementById('authorForm-container');
+            container.addEventListener('click', function (event){
+                if (event.target.classList.contains('delete-row-btn')){
+                    event.target.closest('.form-row').remove();
+                    var formRows = document.getElementById('authorForm-container').querySelectorAll('.form-row');
+                    var newIndex = formRows.length;
+                    $('#author_num').val(newIndex);
+                    $('#id_form-TOTAL_FORMS').val(newIndex);
+                    //console.log($('#id_form-TOTAL_FORMS').val());
+                    checkDeleteButton();
+                    updateForms();
+                }
+            });
+
+            function checkDeleteButton(){
+                var deleteButtons = document.querySelectorAll('.delete-row-btn');
+                var formRows = document.getElementById('authorForm-container').querySelectorAll('.form-row');
+                if (formRows.length === 1) {
+                    deleteButtons.forEach(function (button) {
+                        button.disabled = true;
+                    });
+                } else {
+                    deleteButtons.forEach(function (button) {
+                        button.disabled = false;
+                    });
+                }
+            }
+
+            function updateForms(){
+                var formRows = document.getElementById('authorForm-container').querySelectorAll('.form-row');
+                for (var i = 0; i < formRows.length; i++){
+                    //重新设置name, id
+                    var inputs = formRows[i].querySelectorAll('input:not([type="button"]), select, span');
+                    inputs.forEach(function (item){
+                        var name = item.getAttribute('name');
+                        var id = item.getAttribute('id');
+                        if (name){
+                            item.setAttribute('name', name.replace(/\d+/, i));
+                        }
+                        if (id){
+                            item.setAttribute('id', id.replace(/\d+/, i));
+                        }
+                    });
+                }
+            }
         });
     </script>
     {% block search_js %}
