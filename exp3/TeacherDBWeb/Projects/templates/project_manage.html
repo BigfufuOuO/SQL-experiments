@@ -1,4 +1,5 @@
 {% extends 'basiclayout.html' %}
+
 {% load static %}
 
 {% block css %}
@@ -31,14 +32,14 @@
 
 {% block content %}
     <div class="container">
-        <h1 class="mt-3">论文发表</h1>
+        <h1 class="mt-3">项目管理</h1>
         <div class="card">
-            <div class="card-body" id="paperForm">
+            <div class="card-body" id="projectForm">
                 <form novalidate>
-                    <div id="paperForm-container">
+                    <div id="projectForm-container">
                         <div class="form-row">
-                            {% for field in paperForm %}
-                            <div class="form-group col-md-{{ length.forloop.counter0 }}">
+                            {% for field in projectForm %}
+                            <div class="form-group col-md-3">
                                 <label>{{ field.label }}</label>
                                 {{ field }}
                                 <span style="color: #c82333;" class="error-msg">{{ field.errors.0 }}</span>
@@ -46,24 +47,29 @@
                             {% endfor %}
                         </div>
                     </div>
-                    <div class="card" id="authorCard">
+                    <div class="card" id="teacherCard">
                         <div class="card-header">
-                            论文作者
+                            项目承担
                         </div>
-                        <div class="card-body" id="authorForm-container">
-                            {{ authorFormSet.management_form }}
-                            {% for authorForm in authorFormSet %}
+                        <div class="card-body" id="teacherForm-container">
+                            {{ teacherFormSet.management_form }}
+                            {% for teacherForm in teacherFormSet %}
                                 <div class="form-row">
-                                {% for field in authorForm %}
-                                    {% if field.label != 'Id' %}
                                     <div class="form-group col-md-3">
-                                        <label>{{ field.label }}</label>
-                                        {{ field }}
+                                        <label>{{ teacherForm.teacher_ID.label }}</label>
+                                        {{ teacherForm.teacher_ID }}
                                         <span style="color: #c82333;" class="error-msg"></span>
                                     </div>
-
-                                    {% endif %}
-                                {% endfor %}
+                                    <div class="form-group col-md-2">
+                                        <label>{{ teacherForm.rank.label }}</label>
+                                        {{ teacherForm.rank }}
+                                        <span style="color: #c82333;" class="error-msg"></span>
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        <label>{{ teacherForm.fund_taken.label }}</label>
+                                        {{ teacherForm.fund_taken }}
+                                        <span style="color: #c82333;" class="error-msg"></span>
+                                    </div>
                                 <div class="form-group col-md-1">
                                   <label></label>
                                 <button type="button" class="btn btn-outline-danger delete-row-btn">
@@ -78,10 +84,10 @@
 
                         </div>
                         <div class="container">
-                                <button type="button" class="btn btn-info" id="addAuthorButton">新增作者</button>
+                                <button type="button" class="btn btn-info" id="addAuthorButton">新增教师</button>
                         </div>
                     </div>
-                    <input type="hidden" name="author_num" id="author_num" value="1">
+                    <input type="hidden" name="teacher_num" id="teacher_num" value="1">
                     <button type="search" class="btn btn-info" id="searchButton">查询</button>
                     <button type="add" class="btn btn-success" id="addButton">新增</button>
                 </form>
@@ -96,54 +102,22 @@
 
 {% endblock %}
 {% block js %}
-	<!--<script type="text/javascript">-->
-<!--//使用ajax-->
-    {#$(document).ready(function(){#}
-    {#//页面加载完后执行#}
-    {#    buttonEvent();#}
-    {# });#}
-    {##}
-    {#function buttonEvent(){#}
-    {##}
-    {##}
-    {#    $('#searchButton').click(function(){#}
-    {#        console.log('searchButton clicked');#}
-    {#    });#}
-    {##}
-    {#    $('#addButton').click(function(){#}
-    {#        $(".error-msg").empty();#}
-    {#        event.preventDefault();#}
-    {#        $.ajax({#}
-    {#            url: '/papers/add/',#}
-    {#            type: 'post',#}
-    {#            data: $('#paperForm form').serialize(),#}
-    {#            dataType: "JSON",#}
-    {#            success: function(res){#}
-    {#                console.log(res);#}
-    {#                if(res.status){#}
-    {#                    console.log('add success');#}
-    {#                }#}
-    {#                else{#}
-    {#                    $.each(res.error, function(key, value){#}
-    {#                        $('#id_' + key).next().text(value[0]);#}
-    {#                    });#}
-    {#                }#}
-    {#                //window.location.href = '/papers/add/';#}
-    {#            }#}
-    {#        });#}
-    {#        console.log('addButton clicked');#}
-    {#    });#}
-    {# }#}
-<!--</script>-->
+    <!--js插件-->
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'plugins/datepicker/bootstrap-datepicker-1.9.0/js/bootstrap-datepicker.min.js' %}"></script>
+    <script src="{% static 'plugins/datepicker/bootstrap-datepicker-1.9.0/locales/bootstrap-datepicker.zh-CN.min.js' %}"></script>
+    <script src="{% static 'plugins/select2-4.1.0-rc.0/dist/js/select2.min.js' %}"></script>
+
+    <!--监听查询和新增按钮-->
     <script>
     document.addEventListener('DOMContentLoaded', function (){
-            const Form = document.querySelector('#paperForm form');
+            const Form = document.querySelector('#projectForm form');
             const searchButton = document.getElementById('searchButton');
             const addButton = document.getElementById('addButton');
 
             searchButton.addEventListener('click', function (){
                 //event.preventDefault();
-                Form.action = '/papers/search/';
+                Form.action = '/projects/search/';
                 Form.method = 'get';
             });
 
@@ -154,9 +128,9 @@
                 event.preventDefault();
                 $.ajax(
                     {
-                        url: '/papers/add/',
+                        url: '/projects/add/',
                         type: 'post',
-                        data: $('#paperForm form').serialize(),
+                        data: $('#projectForm form').serialize(),
                         dataType: "JSON",
                         success: function(res) {
                             console.log(res);
@@ -170,29 +144,29 @@
                                 console.log(res.data);
                                 let errorData = res.error;
 
-                                if (errorData['paperForm error']){
-                                    for (let key in errorData['paperForm error']){
-                                        $('#id_' + key).next().text(errorData['paperForm error'][key][0]);
+                                if (errorData['projectForm error']){
+                                    for (let key in errorData['projectForm error']){
+                                        $('#id_' + key).next().text(errorData['projectForm error'][key][0]);
                                         //console.log(errorData['paperForm error'][key][0]);
                                     }
                                 }
 
-                                if (errorData['authorForms error']) {
-                                    for (let i in errorData['authorForms error']) {
-                                        for (let key in errorData['authorForms error'][i]) {
+                                if (errorData['teacherForms error']) {
+                                    for (let i in errorData['teacherForms error']) {
+                                        for (let key in errorData['teacherForms error'][i]) {
                                             if (key === 'teachers'){
-                                                $('#id_form-' + i + '-' + key).next().next().text(errorData['authorForms error'][i][key][0]);
+                                                $('#id_form-' + i + '-' + key).next().next().text(errorData['teacherForms error'][i][key][0]);
                                             } else {
-                                                $('#id_form-' + i + '-' + key).next().text(errorData['authorForms error'][i][key][0]);
+                                                $('#id_form-' + i + '-' + key).next().text(errorData['teacherForms error'][i][key][0]);
                                                 //console.log(errorData['authorForms error'][i][key]);
                                             }
                                         }
                                     }
                                 }
 
-                                if (errorData['authorFormSet error'].length > 0){
+                                if (errorData['teacherFormSet error'].length > 0){
                                     // 在添加作者按钮前面添加alert
-                                    $('#addAuthorButton').before('<div class="alert alert-danger">' + errorData['authorFormSet error'] + '</div>');
+                                    $('#addAuthorButton').before('<div class="alert alert-danger">' + errorData['teacherFormSet error'] + '</div>');
                                 }
                             }
                         }
@@ -201,20 +175,21 @@
         });
     </script>
 
-    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
-    <script src="{% static 'plugins/datepicker/bootstrap-datepicker-1.9.0/js/bootstrap-datepicker.min.js' %}"></script>
-    <script src="{% static 'plugins/datepicker/bootstrap-datepicker-1.9.0/locales/bootstrap-datepicker.zh-CN.min.js' %}"></script>
-    <script src="{% static 'plugins/select2-4.1.0-rc.0/dist/js/select2.min.js' %}"></script>
-<script>
-    $('#id_publish_date').datepicker({
-        format: 'yyyy-mm-dd',
-        startDate: '2001-01-01',
-        endDate: '0',
-        language: 'zh-CN',
-        autoclose: true,
-        todayHighlight: true
-    });
-</script>
+
+
+    <!--日期选择器-->
+    <script>
+        $('#id_publish_date').datepicker({
+            format: 'yyyy-mm-dd',
+            startDate: '2001-01-01',
+            endDate: '0',
+            language: 'zh-CN',
+            autoclose: true,
+            todayHighlight: true
+        });
+    </script>
+
+    <!--select2以及新增教师和删除教师-->
     <script type="text/javascript">
     $(document).ready(function(){
             function initializeSelect2(element){
@@ -224,20 +199,20 @@
                 {#    }#}
                 {# });#}
                 $(element).select2({
-                    placeholder: '请选择作者',
+                    placeholder: '选择',
                     allowClear: true,
                 });
             }
 
             checkDeleteButton();
-            initializeSelect2('.author-select');
+            initializeSelect2('.teacher-select');
 
             $('#addAuthorButton').click(function(){
-                var newIndex = $('#paperForm .form-row').length - 1;
+                var newIndex = $('#projectForm .form-row').length - 1;
                 console.log(newIndex);
                 //销毁 select2
-                $('#authorForm-container .author-select').select2('destroy');
-                var newFormHtml = $('#authorForm-container .form-row:first').clone();
+                $('#teacherForm-container .teacher-select').select2('destroy');
+                var newFormHtml = $('#teacherForm-container .form-row:first').clone();
                 newFormHtml.find(':input:not(button), select, span').each(function(){
                     var name = $(this).attr('name');
                     var id = $(this).attr('id');
@@ -252,21 +227,21 @@
                     //console.log($(this));
                 });
 
-                $('#authorForm-container').append(newFormHtml);
-                $('#author_num').val(newIndex + 1);
+                $('#teacherForm-container').append(newFormHtml);
+                $('#teacher_num').val(newIndex + 1);
                 $('#id_form-TOTAL_FORMS').val(newIndex + 1);
                 // select 2 初始化复制的元素
-                initializeSelect2('.author-select');
+                initializeSelect2('.teacher-select');
                 //console.log($('#id_form-TOTAL_FORMS').val());
                 checkDeleteButton();
             });
 
             //删除作者
-            var container = document.getElementById('authorForm-container');
+            var container = document.getElementById('teacherForm-container');
             container.addEventListener('click', function (event){
                 if (event.target.classList.contains('delete-row-btn')){
                     event.target.closest('.form-row').remove();
-                    var formRows = document.getElementById('authorForm-container').querySelectorAll('.form-row');
+                    var formRows = document.getElementById('teacherForm-container').querySelectorAll('.form-row');
                     var newIndex = formRows.length;
                     $('#author_num').val(newIndex);
                     $('#id_form-TOTAL_FORMS').val(newIndex);
@@ -278,7 +253,7 @@
 
             function checkDeleteButton(){
                 var deleteButtons = document.querySelectorAll('.delete-row-btn');
-                var formRows = document.getElementById('authorForm-container').querySelectorAll('.form-row');
+                var formRows = document.getElementById('teacherForm-container').querySelectorAll('.form-row');
                 if (formRows.length === 1) {
                     deleteButtons.forEach(function (button) {
                         button.disabled = true;
@@ -291,7 +266,7 @@
             }
 
             function updateForms(){
-                var formRows = document.getElementById('authorForm-container').querySelectorAll('.form-row');
+                var formRows = document.getElementById('teacherForm-container').querySelectorAll('.form-row');
                 for (var i = 0; i < formRows.length; i++){
                     //重新设置name, id
                     var inputs = formRows[i].querySelectorAll('input:not([type="button"]), select, span');

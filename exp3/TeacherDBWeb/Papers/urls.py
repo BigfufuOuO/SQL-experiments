@@ -6,4 +6,5 @@ urlpatterns = [
     path('add/', views.paper_add, name='paperAdd'),
     path('search/', views.paper_search, name='paperSearch'),
     path('edit/<int:id>', views.paper_edit, name='paperEdit'),
+    path('delete/<int:id>', views.paper_delete, name='paperDelete')
 ]

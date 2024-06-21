@@ -1,0 +1,64 @@
+{% extends 'project_manage.html' %}
+
+{% block list %}
+    <table class="table mt-5">
+    <thead class="thead-dark">
+      <tr>
+        {% for field in projectForm %}
+        <th scope="col">{{ field.label }}</th>
+        {% endfor %}
+        <th scope="col">经费</th>
+        <th scope="col">操作</th>
+      </tr>
+    </thead>
+    {% for project in projects %}
+        <tr>
+            <td>{{ project.ID }}</td>
+            <td>{{ project.name }}</td>
+            <td>{{ project.source }}</td>
+            <td>{{ project.get_project_type_display }}</td>
+            <td>{{ project.start_date }}</td>
+            <td>{{ project.end_date }}</td>
+            <td>{{ project.fund }}</td>
+            <td>
+                <a class="btn btn-info btn-sm" href="/projects/edit/{{ project.ID }}" role="button">编辑</a>
+                <a class="btn btn-danger btn-sm" href="/projects/delete/{{ project.ID }}" role="button">删除</a>
+            </td>
+        </tr>
+    {% endfor %}
+  </table>
+
+    <!-- 如果没有搜索到，弹出警告 -->
+    {% if projects|length == 0 %}
+    <div class="alert alert-danger" role="alert">
+  没有搜索到 <a href="#" class="alert-link">符合条件的项</a>. 请检查你的输入.
+    </div>
+    {% endif %}
+
+    <!-- 分页 -->
+    <nav aria-label="Page navigation">
+  <ul class="pagination justify-content-center">
+    <li class="page-item">
+        {{ pageInfo.pagePrev }}
+    </li>
+        {{ page_list }}
+    <li class="page-item">
+        {{ pageInfo.pageNext }}
+    </li>
+  </ul>
+</nav>
+{% endblock %}
+
+{% block search_js %}
+	<script>
+    //不允许作者
+    var ele = document.getElementById('teacherCard');
+    ele.innerHTML = '';
+    ele.remove();
+
+    var addButton = document.getElementById('addButton');
+    //禁用
+    addButton.disabled = true;
+    </script>
+
+{% endblock %}

@@ -152,9 +152,6 @@ class AuthorFormSet_custom(forms.BaseModelFormSet):
             instance.save()
 
 
-
-
-
 AuthorFormSet = forms.modelformset_factory(model=Teacher_Paper, form=AuthorForm,
                                            formset=AuthorFormSet_custom, extra=1)
 

@@ -1,4 +1,4 @@
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render, HttpResponse, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.forms import modelformset_factory
 import json
@@ -23,7 +23,7 @@ def paper_add(request):
     print(request.POST)
     if paper_form.is_valid() and author_form_set.is_valid():
         instance_paper = paper_form.save()
-        instance_author = author_form_set.save(commit=False)
+        instance_author = author_form_set.save()
         data_dic = {"status": True, "error": []}
         return HttpResponse(json.dumps(data_dic))
     else:
@@ -101,4 +101,5 @@ def paper_edit(request, id='0'):
             return HttpResponse(json.dumps(data_dic))
 
 def paper_delete(request, id='0'):
-    models.Paper.objects.get(ID=id).delete()
+    Paper.objects.get(ID=id).delete()
+    return redirect('/papers/search/')
