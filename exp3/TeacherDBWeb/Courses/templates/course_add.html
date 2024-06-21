@@ -1,0 +1,126 @@
+{% extends 'basiclayout.html' %}
+
+{% load static %}
+
+{% block css %}
+	<link rel="stylesheet" href="{% static 'plugins/datepicker/bootstrap-datepicker-1.9.0/css/bootstrap-datepicker3.css' %}">
+    <link href="{% static 'plugins/select2-4.1.0-rc.0/dist/css/select2.css' %}" rel="stylesheet" />
+    <style>
+        .container::after{
+            content: '';
+            display: block;
+            height: 20px;
+        }
+
+        .error-msg{
+            position: absolute;
+            top: 100%;
+            left: 2%;
+        }
+
+        .form-group{
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .card{
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="mt-3">课程添加</h1>
+        <div class="card">
+            <div class="card-body" id="courseForm">
+                <form novalidate>
+                    <div id="courseForm-container">
+                        <div class="form-row">
+                            {% for field in courseForm %}
+                            <div class="form-group col-md-3">
+                                <label>{{ field.label }}</label>
+                                {{ field }}
+                                <span style="color: #c82333;" class="error-msg">{{ field.errors.0 }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <button type="add" class="btn btn-success" id="addButton">新增</button>
+                </form>
+            </div>
+        </div>
+    {% block list %}
+    {% endblock %}
+    </div>
+
+
+
+
+{% endblock %}
+{% block js %}
+    <!--js插件-->
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'plugins/datepicker/bootstrap-datepicker-1.9.0/js/bootstrap-datepicker.min.js' %}"></script>
+    <script src="{% static 'plugins/datepicker/bootstrap-datepicker-1.9.0/locales/bootstrap-datepicker.zh-CN.min.js' %}"></script>
+    <script src="{% static 'plugins/select2-4.1.0-rc.0/dist/js/select2.min.js' %}"></script>
+
+    <!--监听查询和新增按钮-->
+    <script>
+    document.addEventListener('DOMContentLoaded', function (){
+            const Form = document.querySelector('#courseForm form');
+            //const searchButton = document.getElementById('searchButton');
+            const addButton = document.getElementById('addButton');
+
+            addButton.addEventListener('click', function (){
+                document.querySelectorAll('.alert').forEach(function (item){
+                    item.remove();
+                });
+                event.preventDefault();
+                $.ajax(
+                    {
+                        url: '/courses/add_individually/',
+                        type: 'post',
+                        data: $('#courseForm form').serialize(),
+                        dataType: "JSON",
+                        success: function(res) {
+                            console.log(res);
+                            $('.error-msg').text('');
+                            if (res.status) {
+                                var confirmed = confirm('添加成功');
+                            }else {
+                                console.log(res.data);
+                                let errorData = res.error;
+
+                                if (errorData['courseForm error']) {
+                                    for (let key in errorData['courseForm error']) {
+                                        $('#id_' + key).next().text(errorData['courseForm error'][key][0]);
+                                        //console.log(errorData['paperForm error'][key][0]);
+                                    }
+                                }
+                            }
+                        }
+                    });
+            });
+        });
+    </script>
+
+
+
+    <!--日期选择器-->
+    <script>
+        $('#id_publish_date').datepicker({
+            format: 'yyyy-mm-dd',
+            startDate: '2001-01-01',
+            endDate: '0',
+            language: 'zh-CN',
+            autoclose: true,
+            todayHighlight: true
+        });
+    </script>
+
+    <!--select2以及新增教师和删除教师-->
+    {% block search_js %}
+    {% endblock %}
+{% endblock %}

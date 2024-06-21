@@ -1,0 +1,292 @@
+{% extends 'basiclayout.html' %}
+
+{% load static %}
+
+{% block css %}
+	<link rel="stylesheet" href="{% static 'plugins/datepicker/bootstrap-datepicker-1.9.0/css/bootstrap-datepicker3.css' %}">
+    <link href="{% static 'plugins/select2-4.1.0-rc.0/dist/css/select2.css' %}" rel="stylesheet" />
+    <style>
+        .container::after{
+            content: '';
+            display: block;
+            height: 20px;
+        }
+
+        .error-msg{
+            position: absolute;
+            top: 100%;
+            left: 2%;
+        }
+
+        .form-group{
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .card{
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="mt-3">课程管理</h1>
+        <div class="card">
+            <div class="card-body" id="courseForm">
+                <form novalidate>
+                    <div id="courseForm-container">
+                        <div class="form-row">
+                            {% for field in courseForm %}
+                            <div class="form-group col-md-3">
+                                <label>{{ field.label }}</label>
+                                {{ field }}
+                                <span style="color: #c82333;" class="error-msg">{{ field.errors.0 }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="card" id="teacherCard">
+                        <div class="card-header">
+                            任课老师
+                        </div>
+                        <div class="card-body" id="teacherForm-container">
+                            {{ teacherFormSet.management_form }}
+                            {% for teacherForm in teacherFormSet %}
+                                <div class="form-row">
+                                    <div class="form-group col-md-3">
+                                        <label>{{ teacherForm.teacher_ID.label }}</label>
+                                        {{ teacherForm.teacher_ID }}
+                                        <span style="color: #c82333;" class="error-msg"></span>
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        <label>{{ teacherForm.hours_taken.label }}</label>
+                                        {{ teacherForm.hours_taken }}
+                                        <span style="color: #c82333;" class="error-msg"></span>
+                                    </div>
+                                <div class="form-group col-md-1">
+                                  <label></label>
+                                <button type="button" class="btn btn-outline-danger delete-row-btn">
+                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+              <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
+            </svg>
+                                    删除
+                                </button>
+                                </div>
+                                </div>
+                            {% endfor %}
+
+                        </div>
+                        <div class="container">
+                                <button type="button" class="btn btn-info" id="addAuthorButton">新增教师</button>
+                        </div>
+                    </div>
+                    <input type="hidden" name="teacher_num" id="teacher_num" value="1">
+                    <button type="search" class="btn btn-info" id="searchButton">查询</button>
+                    <button type="add" class="btn btn-success" id="addButton">新增</button>
+                </form>
+            </div>
+        </div>
+    {% block list %}
+    {% endblock %}
+    </div>
+
+
+
+
+{% endblock %}
+{% block js %}
+    <!--js插件-->
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'plugins/datepicker/bootstrap-datepicker-1.9.0/js/bootstrap-datepicker.min.js' %}"></script>
+    <script src="{% static 'plugins/datepicker/bootstrap-datepicker-1.9.0/locales/bootstrap-datepicker.zh-CN.min.js' %}"></script>
+    <script src="{% static 'plugins/select2-4.1.0-rc.0/dist/js/select2.min.js' %}"></script>
+
+    <!--监听查询和新增按钮-->
+    <script>
+    document.addEventListener('DOMContentLoaded', function (){
+            const Form = document.querySelector('#courseForm form');
+            const searchButton = document.getElementById('searchButton');
+            const addButton = document.getElementById('addButton');
+
+            searchButton.addEventListener('click', function (){
+                //event.preventDefault();
+                Form.action = '/courses/search/';
+                Form.method = 'get';
+            });
+
+            addButton.addEventListener('click', function (){
+                document.querySelectorAll('.alert').forEach(function (item){
+                    item.remove();
+                });
+                event.preventDefault();
+                $.ajax(
+                    {
+                        url: '/courses/add/',
+                        type: 'post',
+                        data: $('#courseForm form').serialize(),
+                        dataType: "JSON",
+                        success: function(res) {
+                            console.log(res);
+                            $('.error-msg').text('');
+                            if (res.status) {
+                                var confirmed = confirm('添加成功');
+                                if (confirmed) {
+                                    window.history.back();
+                                }
+                            }else {
+                                console.log(res.data);
+                                let errorData = res.error;
+
+                                if (errorData['courseForm error']){
+                                    for (let key in errorData['courseForm error']){
+                                        if (key === 'course_ID'){
+                                            $('#id_' + key).next().next().text(errorData['courseForm error'][key][0]);
+                                        } else if (key === '__all__'){
+                                            //在card前添加alert
+                                            $('#teacherCard').before('<div class="alert alert-danger">' + errorData['courseForm error'][key][0] + '</div>');
+                                        }
+                                        else {
+                                            $('#id_' + key).next().text(errorData['courseForm error'][key][0]);
+                                            //console.log(errorData['paperForm error'][key][0]);
+                                        }
+                                    }
+                                }
+
+                                if (errorData['teacherForms error']) {
+                                    for (let i in errorData['teacherForms error']) {
+                                        for (let key in errorData['teacherForms error'][i]) {
+                                            if (key === 'teacher_ID'){
+                                                $('#id_form-' + i + '-' + key).next().next().text(errorData['teacherForms error'][i][key][0]);
+                                            } else {
+                                                $('#id_form-' + i + '-' + key).next().text(errorData['teacherForms error'][i][key][0]);
+                                                //console.log(errorData['authorForms error'][i][key]);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (errorData['teacherFormSet error'].length > 0){
+                                    // 在添加作者按钮前面添加alert
+                                    $('#addAuthorButton').before('<div class="alert alert-danger">' + errorData['teacherFormSet error'] + '</div>');
+                                }
+                            }
+                        }
+                    });
+            });
+        });
+    </script>
+
+
+
+    <!--日期选择器-->
+    <script>
+        $('#id_publish_date').datepicker({
+            format: 'yyyy-mm-dd',
+            startDate: '2001-01-01',
+            endDate: '0',
+            language: 'zh-CN',
+            autoclose: true,
+            todayHighlight: true
+        });
+    </script>
+
+    <!--select2以及新增教师和删除教师-->
+    <script type="text/javascript">
+    $(document).ready(function(){
+            function initializeSelect2(element) {
+                {#$('.author-select').each(function () {#}
+                {#    if ($(this).hasClass('select2-hidden-accessible')) {#}
+                {#        $(this).select2('destroy');#}
+                {#    }#}
+                {# });#}
+                $(element).select2({
+                    placeholder: '选择',
+                    allowClear: true,
+                });
+            }
+            initializeSelect2('.teacher-select');
+            initializeSelect2('.course-select');
+            checkDeleteButton();
+
+            $('#addAuthorButton').click(function(){
+                var newIndex = $('#courseForm .form-row').length - 1;
+                console.log(newIndex);
+                //销毁 select2
+                $('#teacherForm-container .teacher-select').select2('destroy');
+                var newFormHtml = $('#teacherForm-container .form-row:first').clone();
+                newFormHtml.find(':input:not(button), select, span').each(function(){
+                    var name = $(this).attr('name');
+                    var id = $(this).attr('id');
+                    if (name){
+                        $(this).attr('name', name.replace('-0-', '-' + newIndex + '-'));
+                        //console.log($(this).attr('name'));
+                    }
+                    if (id){
+                        $(this).attr('id', id.replace('-0-', '-' + newIndex + '-'));
+                        //console.log($(this).attr('id'))
+                    }
+                    //console.log($(this));
+                });
+
+                $('#teacherForm-container').append(newFormHtml);
+                $('#teacher_num').val(newIndex + 1);
+                $('#id_form-TOTAL_FORMS').val(newIndex + 1);
+                // select 2 初始化复制的元素
+                initializeSelect2('.teacher-select');
+                //console.log($('#id_form-TOTAL_FORMS').val());
+                checkDeleteButton();
+            });
+
+            //删除作者
+            var container = document.getElementById('teacherForm-container');
+            container.addEventListener('click', function (event){
+                if (event.target.classList.contains('delete-row-btn')){
+                    event.target.closest('.form-row').remove();
+                    var formRows = document.getElementById('teacherForm-container').querySelectorAll('.form-row');
+                    var newIndex = formRows.length;
+                    $('#author_num').val(newIndex);
+                    $('#id_form-TOTAL_FORMS').val(newIndex);
+                    //console.log($('#id_form-TOTAL_FORMS').val());
+                    checkDeleteButton();
+                    updateForms();
+                }
+            });
+
+            function checkDeleteButton(){
+                var deleteButtons = document.querySelectorAll('.delete-row-btn');
+                var formRows = document.getElementById('teacherForm-container').querySelectorAll('.form-row');
+                if (formRows.length === 1) {
+                    deleteButtons.forEach(function (button) {
+                        button.disabled = true;
+                    });
+                } else {
+                    deleteButtons.forEach(function (button) {
+                        button.disabled = false;
+                    });
+                }
+            }
+
+            function updateForms(){
+                var formRows = document.getElementById('teacherForm-container').querySelectorAll('.form-row');
+                for (var i = 0; i < formRows.length; i++){
+                    //重新设置name, id
+                    var inputs = formRows[i].querySelectorAll('input:not([type="button"]), select, span');
+                    inputs.forEach(function (item){
+                        var name = item.getAttribute('name');
+                        var id = item.getAttribute('id');
+                        if (name){
+                            item.setAttribute('name', name.replace(/\d+/, i));
+                        }
+                        if (id){
+                            item.setAttribute('id', id.replace(/\d+/, i));
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+    {% block search_js %}
+    {% endblock %}
+{% endblock %}
