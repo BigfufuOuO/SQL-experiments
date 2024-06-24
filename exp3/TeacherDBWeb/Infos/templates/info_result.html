@@ -1,0 +1,76 @@
+{% extends 'info_search.html' %}
+
+
+
+{% block result %}
+	<div class="container" id="infoResult">
+        <h3 style="text-align: center;">教师科研工作统计({{ infoForm.cleaned_data.start_year }}-{{ infoForm.cleaned_data.end_year }})</h3>
+
+        <h4 class="section-title">教师信息</h4>
+        <hr>
+    <div class="flex-container">
+        <div class="item">工号：{{ teacher.ID }}</div>
+        <div class="item">姓名：{{ teacher.name }}</div>
+        <div class="item">性别：{{ teacher.get_sex_display }}</div>
+        <div class="item">职称：{{ teacher.get_position_display }}</div>
+        <div class="item"></div>
+    </div>
+
+
+    <h4 class="section-title">任课情况</h4>
+    <hr>
+    {% if teacher_courses|length %}
+        {% for teacher in teacher_courses %}
+        <div class="flex-container">
+            <div class="item">课程号：{{ teacher.course_ID.ID }}</div>
+            <div class="item">课程名：{{ teacher.course_ID.name}}</div>
+            <div class="item">主讲学时：{{ teacher.hours_taken }}</div>
+            <div class="item">学期：{{ teacher.year }} {{ teacher.get_semester_display }}</div>
+            <div class="item"></div>
+        </div>
+    {% endfor %}
+    {% else %}
+            <div class="container">
+            无任课
+            </div>
+    {% endif %}
+
+    <h4 class="section-title">科研情况</h4>
+    <hr>
+    {% if teacher_papers|length %}
+        <div class="container">
+        <ol>
+        {% for teacher in teacher_papers %}
+            <li>{{ teacher.paper.title }}, {{ teacher.paper.source }}, {{ teacher.paper.publish_date }},
+                {{ teacher.paper.get_publish_type_display }}, {{ teacher.paper.get_publish_level_display }}, 排名第{{ teacher.rank }}
+             {% if teacher.is_corresponding_author %}
+                 , 通讯作者
+            {% endif %}</li>
+        {% endfor %}
+        </ol>
+        </div>
+        {% else %}
+        <div class="container">
+            无论文
+        </div>
+    {% endif %}
+
+    <h4 class="section-title">项目承担</h4>
+    <hr>
+    {% if teacher_projects|length %}
+        <div class="container">
+        <ol>
+            {% for teacher in teacher_projects %}
+                <li>{{ teacher.project_ID.name }}, {{ teacher.project_ID.source }}, {{ teacher.project_ID.get_project_type_display }},
+                {{ teacher.project_ID.start_date }}-{{ teacher.project_ID.end_date }}, 总经费：{{ teacher.project_ID.fund }},
+                承担经费：{{ teacher.fund_taken }}</li>
+            {% endfor %}
+        </ol>
+        </div>
+        {% else %}
+        <div class="container">
+        无项目
+        </div>
+    {% endif %}
+    </div>
+{% endblock %}

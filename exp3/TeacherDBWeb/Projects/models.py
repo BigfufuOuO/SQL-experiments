@@ -33,8 +33,6 @@ class Teacher_Project(models.Model):
     class Meta:
         unique_together = ('teacher_ID', 'project_ID')
     
-    def __str__(self):
-        return self.ID
 
 
 class ProjectForm(forms.ModelForm):

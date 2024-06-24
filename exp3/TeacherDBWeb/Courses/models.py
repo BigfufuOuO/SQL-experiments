@@ -65,6 +65,8 @@ class CourseDetailForm(forms.ModelForm):
 
     def clean(self):
         super().clean()
+        if any(self.errors):
+            return
         # 检查该课程是否被添加过
         print(self.cleaned_data)
         course_ID = self.cleaned_data.get('course_ID', None)
@@ -135,10 +137,14 @@ class TeacherCourseFormSet_custom(forms.BaseModelFormSet):
         total_hours = 0
         for form in self.forms:
             total_hours += form.cleaned_data.get('hours_taken', 0)
-        course_ID = self.data.get('course_ID', None) or self.course_instance.ID
-        course_hours = Course.objects.get(ID=course_ID).hours
+        course_ID = self.data.get('course_ID', None) or (self.course_instance.ID if self.course_instance else None)
+        if course_ID:
+            course_hours = Course.objects.get(ID=course_ID).hours
+        else:
+            raise forms.ValidationError('课程号不能为空')
         if total_hours != course_hours:
             raise forms.ValidationError('教师承担学时总和必须等于课程学时')
+
 
     def save(self, course_info, commit=True):
         for form in self.forms:

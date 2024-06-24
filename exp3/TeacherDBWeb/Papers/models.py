@@ -55,6 +55,12 @@ class PaperForm(forms.ModelForm):
         if len(str_ID) != 5:
             raise forms.ValidationError('ID长度必须为5')
         return str_ID
+
+    def clean_title(self):
+        title = self.cleaned_data['title']
+        if "'" in title or '"' in title or '’' in title or '“' in title or '”' in title:
+            raise forms.ValidationError('标题中不能包含单引号或双引号')
+        return title
     class Meta:
         model = Paper
         fields = ['ID', 'title', 'source', 'publish_date', 'publish_type', 'publish_level']

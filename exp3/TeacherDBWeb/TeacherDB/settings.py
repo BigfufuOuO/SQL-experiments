@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'Papers.apps.PapersConfig',
     'Projects.apps.ProjectsConfig',
     'Courses.apps.CoursesConfig',
+    'Infos.apps.InfosConfig',
+    'wkhtmltopdf',
 ]
 
 MIDDLEWARE = [
@@ -130,3 +132,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+WKHTMLTOPDF_CMD = ' /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/wkhtmltopdf'
