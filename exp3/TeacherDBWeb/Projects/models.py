@@ -43,9 +43,11 @@ class ProjectForm(forms.ModelForm):
                                     widget=forms.NumberInput(attrs={'class': 'form-control'}))
     end_date = forms.IntegerField(label='结束年份', min_value=2000,
                                   widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    fund = forms.FloatField(label='总经费', min_value=0,
+                            widget=forms.NumberInput(attrs={'class': 'form-control'}))
     class Meta:
         model = Project
-        fields = ['ID', 'name', 'source', 'project_type', 'start_date', 'end_date']
+        fields = ['ID', 'name', 'source', 'project_type', 'start_date', 'end_date', 'fund']
         widgets = {
             #'ID': forms.TextInput(attrs={'class': 'form-control'}),
             'name': forms.TextInput(attrs={'class': 'form-control'}),
@@ -55,9 +57,8 @@ class ProjectForm(forms.ModelForm):
             #'end_date': forms.DateInput(attrs={'class': 'form-control'}),
         }
 
-    def save(self, sum_funds, commit=True):
+    def save(self, sum_funds=0, commit=True):
         instance = super().save(commit=False)
-        instance.fund = sum_funds
         if commit:
             instance.save()
         return instance
@@ -68,6 +69,7 @@ class ProjectForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if operation_type == 'update':
             self.fields['ID'].disabled = True
+            self.fields['fund'].disabled = True
         elif operation_type == 'query':
             for field in self.fields.values():
                 field.required = False
@@ -90,6 +92,7 @@ class TeacherProjectForm(forms.ModelForm):
 
 class TeacherPJFromSet_custom(forms.BaseModelFormSet):
     def __init__(self, *args, **kwargs):
+        self.original_data = kwargs.pop('original_data', None)
         super().__init__(*args, **kwargs)
         for form in self.forms:
             form.empty_permitted = False
@@ -122,6 +125,7 @@ class TeacherPJFromSet_custom(forms.BaseModelFormSet):
                 raise forms.ValidationError('教师不能重复')
             teacher_list.append(teacher)
 
+
         # 排名不能重复
         rank_list = []
         for form in self.forms:
@@ -129,6 +133,15 @@ class TeacherPJFromSet_custom(forms.BaseModelFormSet):
             if rank in rank_list:
                 raise forms.ValidationError('排名不能重复')
             rank_list.append(rank)
+
+        # 总经费必须等于项目经费
+        total_funds = 0
+        for form in self.forms:
+            total_funds += float(form.cleaned_data.get('fund_taken', 0))
+        print(self.original_data.__dict__)
+        fund = float(self.data.get('fund', 0) or self.original_data.fund)
+        if total_funds != fund:
+            raise forms.ValidationError('总经费必须等于项目经费')
 
 
     def save(self, commit=True, project_id='0'):

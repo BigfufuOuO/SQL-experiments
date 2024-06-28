@@ -26,8 +26,8 @@ def project_add(request):
     print(request.POST)
     if project_form.is_valid() and teacher_project_formset.is_valid():
         # save data
-        sum_funds = get_sum_funds(teacher_project_formset)
-        instance_project = project_form.save(sum_funds=sum_funds)
+        # sum_funds = get_sum_funds(teacher_project_formset)
+        instance_project = project_form.save()
         teacher_project_formset = teacher_project_formset.save(commit=False)
         data_dic = {"status": True, "error": []}
         return HttpResponse(json.dumps(data_dic))
@@ -84,10 +84,10 @@ def project_edit(request, id='0'):
 
     if request.method == 'POST':
         project_form = ProjectForm(data=request.POST, instance=original_project_data, operation_type='update')
-        teacher_project_formset = TeacherPJFormSet(data=request.POST)
+        teacher_project_formset = TeacherPJFormSet(data=request.POST, original_data=original_project_data)
         if project_form.is_valid() and teacher_project_formset.is_valid():
-            sum_funds = get_sum_funds(teacher_project_formset)
-            instance_project = project_form.save(sum_funds=sum_funds)
+            # sum_funds = get_sum_funds(teacher_project_formset)
+            instance_project = project_form.save()
             # 原数据
             original_teacher_project_data = Teacher_Project.objects.filter(project_ID=id)
             # 删除
